@@ -6,6 +6,7 @@ from selenium.webdriver.common import keys
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import TimeoutException
@@ -16,14 +17,24 @@ from pathlib import Path
 from airflow.models import DAG
 from datetime import datetime
 from datetime import timedelta
-from airflow.operators import BashOperator
+
 
 
 class SporcleAutobot():
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.driver = webdriver.Chrome(ChromeDriverManager().install())
+    def __init__(self, headless: bool = False):
+
+        if headless:
+            chrome_options = Options()
+            chrome_options.add_argument("--no-sandbox")
+            chrome_options.add_argument("--disable-dev-shm-usage")
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--window-size=1920,1080")
+            chrome_options.add_argument("--start-maximized")
+            chrome_options.headless = True
+            self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+        else:
+            self.driver = webdriver.Chrome(ChromeDriverManager().install())
 
     
     def load_page(self):
@@ -68,9 +79,10 @@ class SporcleAutobot():
         time.sleep(3)
         answer_button = self.driver.find_element(by=By.XPATH, value = "//*[@id='slot0']/div")
         answer_button.click()
+        time.sleep(2)
 
 if __name__ == "__main__":
-    bot = SporcleAutobot()
+    bot = SporcleAutobot(headless= True)
     bot.load_page()
     bot.accept_cookies()
     bot.login()

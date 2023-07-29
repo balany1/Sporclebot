@@ -16,8 +16,7 @@ from pathlib import Path
 from airflow.models import DAG
 from datetime import datetime
 from datetime import timedelta
-from airflow.operators import BashOperator
-from airflow.operators import PythonOperator
+from airflow.operators.python import PythonOperator
 from sporcle import SporcleAutobot
 
 default_args = {
